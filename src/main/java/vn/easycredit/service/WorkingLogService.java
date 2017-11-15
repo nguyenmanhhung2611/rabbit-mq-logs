@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import vn.easycredit.constant.NormalError;
-import vn.easycredit.constant.SwaggerConstant;
+import vn.easycredit.constant.Constant;
 import vn.easycredit.controller.CustomException;
 import vn.easycredit.domain.ErrorInfo.InvalidParameter;
 import vn.easycredit.domain.ErrorInfo.Type;
@@ -49,7 +49,7 @@ public class WorkingLogService implements Serializable{
 	 * @return
 	 */
 	public WorkingLogListResponseBody getWorkingLog(SearchCondition searchCondition) {
-		Page<WorkingLog> page = getHotel(searchCondition);
+		Page<WorkingLog> page = getListLogs(searchCondition);
 
 		int totalPage = page.getTotalPages();
 		long totalItem = page.getTotalElements();
@@ -60,7 +60,7 @@ public class WorkingLogService implements Serializable{
 			listWorkingLogInfo.add(info);
 		}
 		
-		int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : SwaggerConstant.PAGE_SIZE;
+		int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : Constant.PAGE_SIZE;
 		int currentPage = (searchCondition.getCurrentPage() == 0) ? searchCondition.getCurrentPage()+1 : searchCondition.getCurrentPage();
 		return new WorkingLogListResponseBody(listWorkingLogInfo,
 				new Pagination(currentPage, pageSize, totalPage, totalItem));
@@ -72,9 +72,9 @@ public class WorkingLogService implements Serializable{
 	 * @param searchCondition
 	 * @return
 	 */
-	public Page<WorkingLog> getHotel(SearchCondition searchCondition) {
+	public Page<WorkingLog> getListLogs(SearchCondition searchCondition) {
 		int currentPage = (searchCondition.getCurrentPage() != 0) ? searchCondition.getCurrentPage()-1 : searchCondition.getCurrentPage();
-		int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : SwaggerConstant.PAGE_SIZE;
+		int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : Constant.PAGE_SIZE;
 			
 		PageRequest pageRequest = new PageRequest(currentPage, pageSize, searchCondition.getSort(), searchCondition.getSortBy());
 		return workingLogReposiroty.findAll(pageRequest);
@@ -97,12 +97,44 @@ public class WorkingLogService implements Serializable{
     }
     
     /**
-     * update hotel into DB
+     * update working_log
+     * 
+     * @param info
+     * @return
+     */
+    public WorkingLogResponseBody updateWorkingLog(WorkingLogRequest info) throws CustomException{
+		WorkingLog workingLog = updateWorkingLogDB(info);
+		if(workingLog != null){
+			WorkingLogInfo workingLogInfo = objectMapper(workingLog);
+			return new WorkingLogResponseBody(workingLogInfo);
+    	}
+		log.error("can't insert workingLog", info);
+		throw new CustomException(NormalError.SYSTEM_FAIL, Type.TRANSACTION, new InvalidParameter("workingLogInfo", "insert fail"));
+    }
+    
+    /**
+     * add working_log
+     * 
+     * @param info
+     * @return
+     */
+    public void deleteWorkingLog(String logId) throws CustomException{
+		WorkingLog workingLog = workingLogReposiroty.findById(logId);
+		if(workingLog != null){
+			workingLogReposiroty.delete(workingLog);
+    	}
+		log.error("can't delete workingLog", logId);
+		throw new CustomException(NormalError.SYSTEM_FAIL, Type.TRANSACTION, new InvalidParameter("workingLogInfo", "delete fail"));
+    }
+    
+    /**
+     * save working_log into DB
      * @param info
      * @return
      */
     public WorkingLog saveWorkingLogDB(WorkingLogRequest info) throws CustomException{
     	WorkingLog workingLog = new WorkingLog();
+    	workingLog.setId(info.getUuid());
     	workingLog.setInflowApi(info.getInflowApi());
     	workingLog.setRequestHeader(info.getRequestHeader());
     	workingLog.setRequestBody(info.getRequestBody());
@@ -122,8 +154,30 @@ public class WorkingLogService implements Serializable{
 	    	log.error("can't insert", workingLogRepo);
 			throw new CustomException(NormalError.SYSTEM_FAIL, Type.TRANSACTION, new InvalidParameter("hotelInfo", "Insert fail"));
     }
-	
-
+    
+    
+    /**
+     * update working_log into DB
+     * @param info
+     * @return
+     */
+    public WorkingLog updateWorkingLogDB(WorkingLogRequest info) throws CustomException{
+    	WorkingLog workingLog = new WorkingLog();
+    	
+    	workingLog.setStatus(info.getStatus());
+    	workingLog.setNumberOfRetry(info.getNumberOfRetry());
+    	workingLog.setLastModifiedOn(Utilities.getTime());  
+    	workingLog.setLogError(info.getLogError());
+    	
+    	WorkingLog workingLogRepo = workingLogReposiroty.save(workingLog);
+    	
+    	if (workingLogRepo != null){
+    		return workingLogRepo;
+    	} else 
+	    	log.error("can't insert", workingLogRepo);
+			throw new CustomException(NormalError.SYSTEM_FAIL, Type.TRANSACTION, new InvalidParameter("hotelInfo", "Insert fail"));
+    }
+    
 	/**
 	 * mapper object workingLog=> workingLogInfo
 	 * 

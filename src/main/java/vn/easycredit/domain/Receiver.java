@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 
+import vn.easycredit.constant.Constant;
 import vn.easycredit.controller.HomeController;
 
 @Component
@@ -25,12 +26,42 @@ public class Receiver implements Serializable{
         @SuppressWarnings("rawtypes")
 		LogsInfoRequest logRequest = convertJsontoObject(request);
         
-        WorkingLogRequest workingLogrequest = new WorkingLogRequest();
-        workingLogrequest.setInflowApi(logRequest.getInflowApi());
-        workingLogrequest.setRequestHeader(logRequest.getHeader().toString());
-        workingLogrequest.setRequestBody(logRequest.getBody().toString());
+        if (logRequest.getLogStatus().equals(Constant.LOGS_STATUS_INSERT_WORKING_LOG)){
+        	WorkingLogRequest workingLogrequest = new WorkingLogRequest();
+            workingLogrequest.setFromIp(logRequest.getIp());
+            workingLogrequest.setUuid(logRequest.getUuid());
+            workingLogrequest.setInflowApi(logRequest.getInflowApi());
+            workingLogrequest.setRequestHeader(logRequest.getHeader().toString());
+            workingLogrequest.setRequestBody(logRequest.getBody().toString());
+            workingLogrequest.setStatus(logRequest.getStatus());
+            
+            controller.addWorkingLog(workingLogrequest);
+        }else if (logRequest.getLogStatus().equals(Constant.LOGS_STATUS_INSERT_HISTORY)){
+        	HistoryCallRequest historyCallRequest = new HistoryCallRequest();
+        	historyCallRequest.setFromIp(logRequest.getIp());
+        	historyCallRequest.setUuid(logRequest.getUuid());
+        	historyCallRequest.setInflowApi(logRequest.getInflowApi());
+        	historyCallRequest.setRequestHeader(logRequest.getHeader().toString());
+        	historyCallRequest.setRequestBody(logRequest.getBody().toString());
+        	historyCallRequest.setStatus(logRequest.getStatus());
+        	
+        	controller.addHistoryCall(historyCallRequest);
+        	controller.deleteWorkingLog(logRequest.getUuid());
+        }
+        else if(logRequest.getLogStatus().equals(Constant.LOGS_STATUS_UPDATE_WORKING_LOG)) {
+        	WorkingLogRequest workingLogrequest = new WorkingLogRequest();
+            workingLogrequest.setFromIp(logRequest.getIp());
+            workingLogrequest.setUuid(logRequest.getUuid());
+            workingLogrequest.setInflowApi(logRequest.getInflowApi());
+            workingLogrequest.setRequestHeader(logRequest.getHeader().toString());
+            workingLogrequest.setRequestBody(logRequest.getBody().toString());
+            workingLogrequest.setStatus(logRequest.getStatus());
+            
+            controller.updateWorkingLog(workingLogrequest);
+        }
         
-        controller.addWorkingLog(workingLogrequest);
+        
+        
         latch.countDown();
     }
 

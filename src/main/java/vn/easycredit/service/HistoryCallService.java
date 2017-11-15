@@ -12,14 +12,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import vn.easycredit.constant.Constant;
 import vn.easycredit.constant.NormalError;
-import vn.easycredit.constant.SwaggerConstant;
 import vn.easycredit.controller.CustomException;
 import vn.easycredit.domain.ErrorInfo.InvalidParameter;
 import vn.easycredit.domain.ErrorInfo.Type;
 import vn.easycredit.domain.HistoryCallInfo;
 import vn.easycredit.domain.HistoryCallListResponseBody;
-import vn.easycredit.domain.HistoryCallRequest.HistoryCallRequestBody;
+import vn.easycredit.domain.HistoryCallRequest;
 import vn.easycredit.domain.HistoryCallResponseBody;
 import vn.easycredit.domain.Pagination;
 import vn.easycredit.domain.SearchCondition;
@@ -58,7 +58,7 @@ public class HistoryCallService implements Serializable{
         	HistoryCallInfo info = objectHistoryCallMapper(histotyCall);
         	listHistoryCallInfo.add(info);
         }
-        int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : SwaggerConstant.PAGE_SIZE;
+        int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : Constant.PAGE_SIZE;
         int currentPage = (searchCondition.getCurrentPage() == 0) ? searchCondition.getCurrentPage()+1 : searchCondition.getCurrentPage();
         return new HistoryCallListResponseBody(listHistoryCallInfo, new Pagination(currentPage, pageSize, totalPage, totalItem));
     }
@@ -70,7 +70,7 @@ public class HistoryCallService implements Serializable{
      */
     public Page<HistoryCall> getHistoryCall(SearchCondition searchCondition) {
     	int currentPage = (searchCondition.getCurrentPage() != 0) ? searchCondition.getCurrentPage()-1 : searchCondition.getCurrentPage();
-		int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : SwaggerConstant.PAGE_SIZE;
+		int pageSize = (searchCondition.getPageSize() != 0) ? searchCondition.getPageSize() : Constant.PAGE_SIZE;
 			
 		PageRequest pageRequest = new PageRequest(currentPage, pageSize, searchCondition.getSort(), searchCondition.getSortBy());
     	return historyRepo.findAll(pageRequest);
@@ -82,7 +82,7 @@ public class HistoryCallService implements Serializable{
      * @param info
      * @return
      */
-    public HistoryCallResponseBody addHistoryCall(HistoryCallRequestBody info) throws CustomException{
+    public HistoryCallResponseBody addHistoryCall(HistoryCallRequest info) throws CustomException{
     	HistoryCall historyCall = saveHistoryCallDB(info);
 		if(historyCall != null){
 			HistoryCallInfo historyCallInfo = objectHistoryCallMapper(historyCall);
@@ -97,8 +97,9 @@ public class HistoryCallService implements Serializable{
      * @param info
      * @return
      */
-    public HistoryCall saveHistoryCallDB(HistoryCallRequestBody info) throws CustomException{
+    public HistoryCall saveHistoryCallDB(HistoryCallRequest info) throws CustomException{
     	HistoryCall historyCall = new HistoryCall();
+    	historyCall.setId(info.getUuid());
     	historyCall.setInflowApi(info.getInflowApi());
     	historyCall.setRequestHeader(info.getRequestHeader());
     	historyCall.setRequestBody(info.getRequestBody());

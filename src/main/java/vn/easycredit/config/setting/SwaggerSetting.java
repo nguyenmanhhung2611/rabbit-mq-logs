@@ -12,7 +12,7 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.ResponseMessageBuilder;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ResponseMessage;
-import vn.easycredit.constant.SwaggerConstant;
+import vn.easycredit.constant.Constant;
 import vn.easycredit.response.ErrorResponse;
 
 /**
@@ -41,12 +41,12 @@ public class SwaggerSetting implements Serializable{
         return ImmutableList.of(
                 new ResponseMessageBuilder()
                         .code(500)
-                        .message(SwaggerConstant.SWAGGER_INTERNALERROR_MESSAGE)
+                        .message(Constant.SWAGGER_INTERNALERROR_MESSAGE)
                         .responseModel(errorModelRef)
                         .build(),
                 new ResponseMessageBuilder()
                         .code(400)
-                        .message(SwaggerConstant.SWAGGER_BADREQUEST_MESSAGE)
+                        .message(Constant.SWAGGER_BADREQUEST_MESSAGE)
                         .responseModel(errorModelRef)
                         .build());
     }

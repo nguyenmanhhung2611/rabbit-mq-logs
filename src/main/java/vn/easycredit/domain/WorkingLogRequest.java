@@ -11,7 +11,7 @@ import java.util.Date;
 public class WorkingLogRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	private String uuid;
 	private String inflowApi;
 	private String requestHeader;
 	private String requestBody;
@@ -22,6 +22,14 @@ public class WorkingLogRequest implements Serializable {
 	private Date createdOn;
 	private Date lastModifiedOn;
 	private String logError;
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
 	public String getRequestHeader() {
 		return requestHeader;
@@ -103,9 +111,10 @@ public class WorkingLogRequest implements Serializable {
 		this.logError = logError;
 	}
 
-	public WorkingLogRequest(String inflowApi, String requestHeader, String requestBody, String fromIp, String toIp,
-			String status, Integer numberOfRetry, Date createdOn, Date lastModifiedOn, String logError) {
+	public WorkingLogRequest(String uuid, String inflowApi, String requestHeader, String requestBody, String fromIp,
+			String toIp, String status, Integer numberOfRetry, Date createdOn, Date lastModifiedOn, String logError) {
 		super();
+		this.uuid = uuid;
 		this.inflowApi = inflowApi;
 		this.requestHeader = requestHeader;
 		this.requestBody = requestBody;
